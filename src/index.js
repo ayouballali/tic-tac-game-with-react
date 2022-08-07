@@ -1,6 +1,6 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client';
-import './index.css'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
 
 function Square(props) {
   return (
@@ -10,15 +10,14 @@ function Square(props) {
   );
 }
 
-
-
-
 class Board extends React.Component {
   renderSquare(i) {
-    return <Square
-              value={this.props.squares[i]} 
-              onClick={()=> this.props.handelClick(i)}  
-            />;
+    return (
+      <Square
+        value={this.props.squares[i]}
+        onClick={() => this.props.handelClick(i)}
+      />
+    );
   }
 
   render() {
@@ -45,34 +44,52 @@ class Board extends React.Component {
 }
 
 class Game extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {
-      history: [{
-        squares: Array(9).fill(null)
-      }],
-      xIsNext: true
+      history: [
+        {
+          squares: Array(9).fill(null),
+        },
+      ],
+      xIsNext: true,
     };
   }
 
-
-
-  handelClick(i){
+  handelClick(i) {
     const history = this.state.history;
-    const current = history[history.length-1]
+    const current = history[history.length - 1];
+    const squares = current.squares;
 
-    
+    if (testWinning(squares) || squares[i]) return;
 
+    squares[i] = this.state.xIsNext ? "X" : "O";
+
+    this.setState({
+      history: history.concat(squares),
+      xIsNext: !this.state.xIsNext,
+    });
   }
   render() {
+    const history = this.state.history;
+    const current = history[history.length - 1];
+    const winner = testWinning(current.squares);
+
+    let status;
+
+    if (winner) status = "winner is " + winner;
+    else status = "next player is " + this.state.xIsNext ? "X" : "O";
+
     return (
       <div className="game">
         <div className="game-board">
-          <Board handelClick={()=>handelClick(i)} />
+          <Board
+            squares={current.squares}
+            handelClick={(i) => this.handelClick(i)}
+          />
         </div>
         <div className="game-info">
-          <div>{/* status */}</div>
+          <div>{status}</div>
           <ol>{/* TODO */}</ol>
         </div>
       </div>
@@ -85,10 +102,7 @@ class Game extends React.Component {
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<Game />);
 
-
-
-
-function testWinning(squares){
+function testWinning(squares) {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
@@ -100,11 +114,11 @@ function testWinning(squares){
     [2, 4, 6],
   ];
   for (let index = 0; index < lines.length; index++) {
-    const [a,b,c] = lines[index];
-    if(squares[a] && squares[a] === squares[b] && squares[a] === squares[c]){
-       return squares[a]
+    const [a, b, c] = lines[index];
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
     }
   }
-  
+
   return null;
 }
